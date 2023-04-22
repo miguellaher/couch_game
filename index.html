@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body onload="onload()">
+    <h1>Couch Game</h1>
+    <h3>Input players' names</h3>
+    <form id="inputNameForm">
+      <span id="first_name_text">First name:</span>
+      <input
+        id="first_name"
+        type="text"
+        name="fname"
+        minlength="1"
+        required
+      /><br /><br />
+      <input
+        id="submit_name"
+        type="button"
+        onclick="submitName()"
+        value="Submit"
+      />
+    </form>
+
+    <h4>Players:</h4>
+    <p id="players"></p>
+    <input
+      id="start_assigning"
+      type="button"
+      onclick="startAssigning()"
+      value="Start Assigning"
+    />
+
+    <br />
+    <br />
+    <h3 id="player_assign_intro">For player, <span id="player"></span></h3>
+
+    <p id="player_assigned_block">
+      <strong><span id="player_assigned_name"></span></strong> is your name
+    </p>
+
+    <input
+      id="show_name"
+      type="button"
+      onclick="showName()"
+      value="Show Name"
+    />
+
+    <br />
+
+    <input
+      id="next_player"
+      type="button"
+      onclick="nextPlayer()"
+      value="Next Player"
+    />
+
+    <script>
+      var input = document.getElementById("first_name");
+      input.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("submit_name").click();
+        }
+      });
+      function onload() {
+        document.getElementById("first_name").focus();
+        var start_assigning_button = document.getElementById("start_assigning");
+        start_assigning_button.style.display = "none";
+        var show_name_button = document.getElementById("show_name");
+        show_name_button.style.display = "none";
+        var next_player_button = document.getElementById("next_player");
+        next_player_button.style.display = "none";
+        var player_assign_intro = document.getElementById(
+          "player_assign_intro"
+        );
+        player_assign_intro.style.display = "none";
+        var player_assigned_block = document.getElementById(
+          "player_assigned_block"
+        );
+        player_assigned_block.style.display = "none";
+        var query = window.location.search;
+        query = query.replace("?", "");
+        var names = "";
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+          var pos = params[i].indexOf("=");
+          if (i > 0) {
+            names = names + ", " + params[i].substring(pos + 1);
+            if (i > 6) {
+              start_assigning_button.style.display = "block";
+            }
+          } else {
+            names = names + params[i].substring(pos + 1);
+          }
+        }
+        document.getElementById("players").innerHTML = names;
+      }
+      function submitName() {
+        //document.getElementById("inputNameForm").submit();
+        var first_name = document.getElementById("first_name").value;
+        if (first_name.length > 0) {
+          var query = window.location.search;
+          var number = 1;
+          if (query != "") {
+            number = (query.match(/&/g) || []).length + 2;
+            query = query + "&";
+          }
+          query = query.replace("?", "");
+          var insert_to_url = query + number + "=" + first_name;
+          //var query = window.location.search;
+          // var pos = query.indexOf("&");
+          //document.getElementById("fname").innerHTML = query.substring(pos + 1);
+          window.location.replace("index.html?" + insert_to_url);
+        }
+      }
+      const players = [];
+      const playerAssigned = [];
+      const playerNames = [];
+      function startAssigning() {
+        var first_name_text_input = document.getElementById("first_name");
+        first_name_text_input.disabled = true;
+        var submit_name_button = document.getElementById("submit_name");
+        submit_name_button.disabled = true;
+        var start_assigning_button = document.getElementById("start_assigning");
+        start_assigning_button.disabled = true;
+        var show_name_button = document.getElementById("show_name");
+        show_name_button.style.display = "block";
+        var next_player_button = document.getElementById("next_player");
+        next_player_button.style.display = "block";
+        var player_assign_intro = document.getElementById(
+          "player_assign_intro"
+        );
+        player_assign_intro.style.display = "block";
+        var player_assigned_block = document.getElementById(
+          "player_assigned_block"
+        );
+        player_assigned_block.style.display = "block";
+        var player_assigned_name = document.getElementById(
+          "player_assigned_name"
+        );
+        player_assigned_name.innerHTML = "*************";
+        var query = window.location.search;
+        query = query.replace("?", "");
+        var params = query.split("&");
+        for (var i = 0; i < params.length; i++) {
+          var pos = params[i].indexOf("=");
+          var player = params[i].substring(pos + 1);
+          players[i] = player;
+        }
+        for (var i = 0; i < players.length; i++) {
+          var player = players[i];
+          var assignedPlayer =
+            players[Math.floor(Math.random() * players.length)];
+          while (
+            assignedPlayer == player ||
+            playerAssigned.includes(assignedPlayer)
+          ) {
+            assignedPlayer =
+              players[Math.floor(Math.random() * players.length)];
+          }
+          playerAssigned.push(assignedPlayer);
+          playerNames.push([player, assignedPlayer]);
+        }
+        console.log(playerNames);
+
+        var player = document.getElementById("player");
+        player.innerHTML = players[0];
+      }
+      var playerNumber = 0;
+      function showName() {
+        var show_name_button = document.getElementById("show_name");
+        var player_assigned_name = document.getElementById(
+          "player_assigned_name"
+        );
+        if (show_name_button.value == "Show Name") {
+          var playerAssignedName = playerNames[playerNumber][1];
+          player_assigned_name.innerHTML = playerAssignedName;
+          show_name_button.value = "Hide Name";
+        } else {
+          player_assigned_name.innerHTML = "*************";
+          show_name_button.value = "Show Name";
+        }
+      }
+      function nextPlayer() {
+        if (playerNumber < players.length - 1) {
+          playerNumber = playerNumber + 1;
+        } else {
+          playerNumber = 0;
+        }
+        var player = document.getElementById("player");
+        player.innerHTML = players[playerNumber];
+        var show_name_button = document.getElementById("show_name");
+        show_name_button.value = "Show Name";
+        var player_assigned_name = document.getElementById(
+          "player_assigned_name"
+        );
+        player_assigned_name.innerHTML = "*************";
+      }
+    </script>
+  </body>
+</html>
